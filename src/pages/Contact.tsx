@@ -225,7 +225,7 @@ export default function Contact() {
                         <Button type="submit" className="btn-primary">
                           {isSubmitted ? (
                             <>
-                              <Check className="h-4 w-4 ml-2" /> {t.contact.success}
+                              <Check className="h-4 w-4 ml-2" /> {t.contact.messageSent}
                             </>
                           ) : (
                             <>
@@ -237,7 +237,7 @@ export default function Contact() {
                     </form>
                   ) : (
                     <div className="text-center py-8">
-                      <p className="text-primary font-medium">{t.contact.success}</p>
+                      <p className="text-primary font-medium">{t.contact.thankYou}</p>
                     </div>
                   )}
                 </div>

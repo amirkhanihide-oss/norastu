@@ -6,7 +6,7 @@ import './index.css'
 if (typeof window !== 'undefined') {
   window.addEventListener('error', (event) => {
     try {
-      console.log('Global error:', {
+      console.error('Global error:', {
         message: event?.error?.message || event?.message,
         stack: event?.error?.stack,
         filename: event?.filename,
@@ -18,7 +18,7 @@ if (typeof window !== 'undefined') {
 
   window.addEventListener('unhandledrejection', (event) => {
     try {
-      console.log('Unhandled promise rejection:', {
+      console.error('Unhandled promise rejection:', {
         reason: (event as any)?.reason,
       });
     } catch {}
