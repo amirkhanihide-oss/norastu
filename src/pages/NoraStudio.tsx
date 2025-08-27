@@ -12,6 +12,7 @@ import {
   MessageCircle,
   Send,
   X,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -139,6 +140,8 @@ export default function NoraStudio() {
   );
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [lightboxImageSrc, setLightboxImageSrc] = useState<string | null>(null);
+  const [customCategories, setCustomCategories] = useState<Record<string, PortfolioCategory> | null>(null);
+  const [customPlans, setCustomPlans] = useState<PricingPlan[] | null>(null);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -149,10 +152,46 @@ export default function NoraStudio() {
     setActiveSlideIndex(0);
   }, [activeCategoryKey]);
 
+  // Load admin overrides
+  useEffect(() => {
+    try {
+      const storedCategories = localStorage.getItem("portfolio_categories");
+      if (storedCategories) setCustomCategories(JSON.parse(storedCategories));
+    } catch {}
+    try {
+      const storedPlans = localStorage.getItem("pricing_plans");
+      if (storedPlans) setCustomPlans(JSON.parse(storedPlans));
+    } catch {}
+  }, []);
+
+  const portfolioCategories = useMemo(() => {
+    if (!customCategories) return PORTFOLIO_CATEGORIES;
+    return {
+      children: {
+        title: customCategories.children?.title || PORTFOLIO_CATEGORIES.children.title,
+        images: customCategories.children?.images || PORTFOLIO_CATEGORIES.children.images,
+      },
+      wedding: {
+        title: customCategories.wedding?.title || PORTFOLIO_CATEGORIES.wedding.title,
+        images: customCategories.wedding?.images || PORTFOLIO_CATEGORIES.wedding.images,
+      },
+      sport: {
+        title: customCategories.sport?.title || PORTFOLIO_CATEGORIES.sport.title,
+        images: customCategories.sport?.images || PORTFOLIO_CATEGORIES.sport.images,
+      },
+      family: {
+        title: customCategories.family?.title || PORTFOLIO_CATEGORIES.family.title,
+        images: customCategories.family?.images || PORTFOLIO_CATEGORIES.family.images,
+      },
+    } as typeof PORTFOLIO_CATEGORIES;
+  }, [customCategories]);
+
   const activeCategory = useMemo(
-    () => PORTFOLIO_CATEGORIES[activeCategoryKey],
-    [activeCategoryKey]
+    () => portfolioCategories[activeCategoryKey],
+    [activeCategoryKey, portfolioCategories]
   );
+
+  const pricingPlans = useMemo(() => customPlans || PRICING_PLANS, [customPlans]);
   const activeCategoryImageCount = activeCategory.images.length;
 
   const goToNextSlide = useCallback(() => {
@@ -201,6 +240,14 @@ export default function NoraStudio() {
             >
               رزرو نوبت
             </Button>
+            <Button
+              variant="outline"
+              className="text-lg px-8 py-4"
+              onClick={() => (window.location.href = "/booking-status")}
+            >
+              <Search className="ml-2 h-5 w-5" />
+              پیگیری رزرو
+            </Button>
           </div>
         </div>
       </section>
@@ -222,15 +269,19 @@ export default function NoraStudio() {
             }
             className="animate-fade-in anim-delay-140"
           >
-            <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {Object.entries(PORTFOLIO_CATEGORIES).map(([key, category]) => (
-                <TabsTrigger key={key} value={key} className="text-sm md:text-base">
+            <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-2 max-w-2xl mx-auto">
+              {Object.entries(portfolioCategories).map(([key, category]) => (
+                <TabsTrigger
+                  key={key}
+                  value={key}
+                  className="text-sm md:text-base h-10 md:h-12 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                >
                   {category.title}
                 </TabsTrigger>
               ))}
             </TabsList>
 
-            {Object.entries(PORTFOLIO_CATEGORIES).map(([key, category]) => (
+            {Object.entries(portfolioCategories).map(([key, category]) => (
               <TabsContent
                 key={key}
                 value={key}
@@ -268,6 +319,7 @@ export default function NoraStudio() {
                       size="icon"
                       aria-label="قبلی"
                       onClick={goToPreviousSlide}
+                      className="h-10 w-10 md:h-12 md:w-12 rounded-full"
                     >
                       <ChevronLeft className="h-5 w-5" />
                     </Button>
@@ -288,6 +340,7 @@ export default function NoraStudio() {
                       size="icon"
                       aria-label="بعدی"
                       onClick={goToNextSlide}
+                      className="h-10 w-10 md:h-12 md:w-12 rounded-full"
                     >
                       <ChevronRight className="h-5 w-5" />
                     </Button>
@@ -379,7 +432,7 @@ export default function NoraStudio() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {PRICING_PLANS.map((plan, index) => (
+            {pricingPlans.map((plan, index) => (
               <Card
                 key={`plan-${index}`}
                 className={`glass-card relative ${
@@ -427,8 +480,8 @@ export default function NoraStudio() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {/* Phone & Address */}
-            <div className="bg-gradient-to-br from-teal-100 to-teal-50 rounded-2xl p-6 text-center">
-              <Phone className="w-10 h-10 text-teal-600 mx-auto mb-3" />
+            <div className="bg-gradient-to-br from-teal-700 to-teal-600 text-white rounded-2xl p-6 text-center">
+              <Phone className="w-10 h-10 text-white mx-auto mb-3" />
               <h3 className="text-xl font-bold mb-3">تماس تلفنی</h3>
               <a
                 href="tel:09999999999"
@@ -438,21 +491,21 @@ export default function NoraStudio() {
                 <span className="font-medium">۰۹۹۹۹۹۹۹۹۹۹</span>
               </a>
 
-              <div className="space-y-2 text-muted-foreground text-sm">
+              <div className="space-y-2 text-white/90 text-sm">
                 <div className="flex items-center justify-center">
-                  <MapPin className="w-4 h-4 ml-1 text-teal-600" />
+                  <MapPin className="w-4 h-4 ml-1 text-white" />
                   <span>تهران، خیابان مثال، پلاک ۱۲</span>
                 </div>
                 <div className="flex items-center justify-center">
-                  <Clock className="w-4 h-4 ml-1 text-teal-600" />
+                  <Clock className="w-4 h-4 ml-1 text-white" />
                   <span>همه روزه از ۱۰ صبح تا ۱۹</span>
                 </div>
               </div>
             </div>
 
             {/* WhatsApp */}
-            <div className="bg-gradient-to-br from-green-100 to-green-50 rounded-2xl p-6 text-center">
-              <MessageCircle className="w-10 h-10 text-green-600 mx-auto mb-3" />
+            <div className="bg-gradient-to-br from-green-700 to-green-600 text-white rounded-2xl p-6 text-center">
+              <MessageCircle className="w-10 h-10 text-white mx-auto mb-3" />
               <h3 className="text-xl font-bold mb-3">واتساپ</h3>
               <a
                 href="https://wa.me/989999999999"
@@ -463,14 +516,14 @@ export default function NoraStudio() {
                 <MessageCircle className="ml-1 h-4 w-4" />
                 <span className="font-medium">پیام واتساپ</span>
               </a>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-white/90 text-sm">
                 برای مشاوره سریع و رزرو آنلاین در واتساپ با ما در تماس باشید
               </p>
             </div>
 
             {/* Telegram */}
-            <div className="bg-gradient-to-br from-blue-100 to-blue-50 rounded-2xl p-6 text-center">
-              <Send className="w-10 h-10 text-blue-600 mx-auto mb-3" />
+            <div className="bg-gradient-to-br from-blue-700 to-blue-600 text-white rounded-2xl p-6 text-center">
+              <Send className="w-10 h-10 text-white mx-auto mb-3" />
               <h3 className="text-xl font-bold mb-3">تلگرام</h3>
               <a
                 href="https://t.me/NoraStudio"
@@ -481,14 +534,14 @@ export default function NoraStudio() {
                 <Send className="ml-1 h-4 w-4" />
                 <span className="font-medium">@NoraStudio</span>
               </a>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-white/90 text-sm">
                 برای چت و مشاوره سریع در تلگرام با ما در ارتباط باشید
               </p>
             </div>
 
             {/* Instagram */}
-            <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl p-6 text-center">
-              <Instagram className="w-10 h-10 text-purple-600 mx-auto mb-3" />
+            <div className="bg-gradient-to-br from-purple-700 to-pink-700 text-white rounded-2xl p-6 text-center">
+              <Instagram className="w-10 h-10 text-white mx-auto mb-3" />
               <h3 className="text-xl font-bold mb-3">اینستاگرام</h3>
               <a
                 href="https://instagram.com/Nora_Stu"
@@ -499,7 +552,7 @@ export default function NoraStudio() {
                 <Instagram className="ml-1 h-4 w-4" />
                 <span className="font-medium">Nora_Stu</span>
               </a>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-white/90 text-sm">
                 نمونه‌کارهای روزانه و آخرین اخبار آتلیه را دنبال کنید
               </p>
             </div>
