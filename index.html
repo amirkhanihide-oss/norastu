@@ -12,6 +12,7 @@
     <meta property="og:image" content="/og-image.png" />
     <script type="module">
       window.onerror = function(message, source, lineno, colno, error) {
+        try { console.error('Global error:', { message, source, lineno, colno, error }); } catch {}
         const div = document.createElement("div");
         div.style.cssText = "background:black; color:red; padding:10px; font-size:14px; white-space:pre-wrap;";
         div.innerText = `❌ ERROR: ${message}\nSOURCE: ${source}\nLINE: ${lineno}:${colno}`;
@@ -20,6 +21,7 @@
       };
 
       window.onunhandledrejection = function(event) {
+        try { console.error('Unhandled promise rejection:', event?.reason ?? event); } catch {}
         const div = document.createElement("div");
         div.style.cssText = "background:black; color:red; padding:10px; font-size:14px; white-space:pre-wrap;";
         div.innerText = `❌ UNHANDLED PROMISE REJECTION: ${event.reason}`;
