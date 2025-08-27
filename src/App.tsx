@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { LoadingPage } from "@/components/ui/loading";
 import NoraStudio from "./pages/NoraStudio";
 import BookingForm from "./pages/BookingForm";
@@ -33,6 +33,30 @@ const App = () => {
     return <LoadingPage />;
   }
 
+  // Redirect to home page on hard refresh
+  const ReloadToHome = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+      try {
+        const entries = (typeof performance !== "undefined" && (performance as any).getEntriesByType)
+          ? (performance as any).getEntriesByType("navigation")
+          : [];
+        const isReload = (entries && entries[0]?.type === "reload") || ((performance as any)?.navigation?.type === 1);
+        if (isReload && location.pathname !== "/") {
+          navigate("/", { replace: true });
+        }
+      } catch (err) {
+        console.log("Reload redirect check failed:", err);
+      }
+      // run on mount only
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    return null;
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
@@ -40,6 +64,7 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <ReloadToHome />
             <Routes>
               <Route path="/" element={<NoraStudio />} />
               <Route path="/booking" element={<BookingForm />} />
