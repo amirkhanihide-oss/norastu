@@ -25,8 +25,8 @@ if (typeof window !== 'undefined') {
   });
 }
 
-// Debug-only visual error overlay (remove in production)
-if (typeof window !== 'undefined' && import.meta.env.DEV) {
+// Visual error overlay (remove before production if undesired)
+if (typeof window !== 'undefined') {
   (window as any).onerror = function(message: any, source: any, lineno: any, colno: any, error: any) {
     const div = document.createElement("div");
     div.style.cssText = "background:black; color:red; padding:10px; font-size:14px; white-space:pre-wrap;";
