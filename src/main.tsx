@@ -44,4 +44,21 @@ if (typeof window !== 'undefined') {
   };
 }
 
+// Dev-only manual trigger to test the error overlay via query params
+if (typeof window !== 'undefined' && import.meta.env.DEV) {
+  const searchParams = new URLSearchParams(window.location.search);
+  if (searchParams.has('throw')) {
+    setTimeout(() => {
+      const details = searchParams.get('throw') || 'manual-test';
+      throw new Error(`Test runtime error: ${details}`);
+    }, 0);
+  }
+  if (searchParams.has('reject')) {
+    setTimeout(() => {
+      const details = searchParams.get('reject') || 'manual-test';
+      Promise.reject(`Test unhandled rejection: ${details}`);
+    }, 0);
+  }
+}
+
 createRoot(document.getElementById("root")!).render(<App />);
